@@ -3,67 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TODO List Application</title>
+    <title>Weather App</title>
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <style>
-        body{background-color: #222;display:flex;flex-direction:column;justify-content: center;align-items: center;}
-        h1{color:white;}
-        input { padding: 15px 20px; margin-bottom: 0px; min-width: 600px; border-radius: 5px 0px 0px 5px; border: unset; font-size: 14px;}
-        input:focus{border:unset;outline:unset;}
-        button {background-color: orange;border: unset;padding: 15px 20px;font-size: 14px;border-radius: 0px 5px 5px 0px;}
-        form {display: flex;}
-        ul#taskLists{padding:0px;}
-        ul#taskLists li { color: black; list-style: none; background-color: orange; width: 600px; padding: 10px 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-radius: 5px; font-size: 20px; text-transform: capitalize; font-family: sans-serif; }
-        .action-button button { background-color: white; padding: 9px; border-radius: 6px; width: 90px; margin-left: 10px; }
-        @media (max-width: 768px){
-            input{min-width:100%;border-radius: 10px;margin-bottom: 20px;}
-            form{flex-direction: column;border-radius: 10px;justify-content: center;align-items: center;width: calc(100% - 60px);}
-            button#addTask{border-radius: 10px;}
-            ul#taskLists li{width: auto;}
+        body { background-color: #00b3c8; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        h1 {font-family: sans-serif;padding: 0px;margin: 20px 0px 20px 0px;}
+        input { background-color: white; border: unset; padding: 10px 15px; width: 280px;border-radius: 6px 0px 0px 6px; }
+        input:focus{border:unset;outline: unset;}
+        button { border: unset; background-color: #202547; color: white; padding: 10px 30px; border-radius: 0px 6px 6px 0px;cursor: pointer; }
+        form{display: flex;}
+        .cloud_data {display: flex;column-gap: 10px;}
+        ul {padding: 0px 10px;list-style-type: none;}
+        .weather-entry {background-color: white;padding:0px;border-radius: 5px;width:20%;}
+        .country_name { font-size: 16px; margin: 20px 20px 20px 0px; font-family: sans-serif; text-align: center; color: #202547; font-weight: 700; border-bottom: 3px solid black; display: inline-block; padding-bottom: 5px; }
+        .date { font-size: 16px; font-weight: 400; font-family: sans-serif; background-color: #202547; padding: 15px 20px; color: white;border-radius: 6px 6px 0px 0px;}
+        .average-temperature { font-size: 32px; font-weight: 700; text-align: center; padding-top: 15px; font-family: sans-serif; }
+        ul li {display: flex;justify-content: space-between;border-bottom: 1px solid #00b3c8;padding-bottom: 10px;}
+        ul li div {padding: 5px 10px;font-size: 14px;text-wrap: nowrap;}
+        @media (max-width: 1000px){
+            .cloud_data{flex-direction: column;}
+            .weather-entry{width: 100%;margin-bottom: 15px;}
+        }
+        @media (max-width: 600px){
+        input{width:auto;}
         }
     </style>
 </head>
 <body>
-<h1>TODO List Application</h1>
-<form id="taskForm">
-<input type="text" id="textInput" placeholder="Enter a Task">
-<button id="addTask">Add Task</button>
-</form>
-<ul id="taskLists">
-
-</ul>
+    <h1>Weather App</h1>
+    <form>
+    <input type="text" id="country_name" placeholder="Country ex:India">
+    <button>submit</button>
+    </form>
+    <div class="weather-result"></div>
     <script>
         $(document).ready(function(){
-            $('#taskForm').on('submit',(function(event){
-                event.preventDefault();
-                var task = $('#textInput').val();
-                if(task){
-                    $('#taskLists').append('<li><span class="list-text">'+task+'</span><div class="action-button"><button class="edit">Edit</button><button class="remove">Remove</button></div></li>');
-                        $('.remove').on('click',(function(){
-                            $(this).parents('li').remove();
-                        }))
-                        $('.edit').on('click',(function(){
-                            $(this).parents('li').addClass('currentEdit');
-                            $('#addTask').addClass('currentTask');
-                            var currentTask = $(this).parents('li').find('.list-text').text();
-                            $('#textInput').val(currentTask);
-                            $('#addTask').text('Edit Task');
-                            $('.currentTask').click(function(event){
-                                if($(this).hasClass('currentTask')){
-                                event.preventDefault();
-                                var editTask = $('#textInput').val();
-                                $('.currentEdit').find('.list-text').text(editTask);
-                                $('#addTask').text('Add Task');
-                                $('#textInput').val('');
-                                $('#taskLists').find('li').removeClass('currentEdit');
-                                $('#addTask').removeClass('currentTask');
+            $("button").click(function(e){
+            e.preventDefault();
+            var countryName = $('#country_name').val();
+            $.ajax({url: "https://api.openweathermap.org/data/2.5/forecast?q="+countryName+"&appid=9c22aae7124d9763a5fce72fb6830ba9&units=metric&cnt=40", success: function(result){
+                var weatherData = result;
+                console.log(weatherData);
+                var weatherCountry = weatherData.city.name;
+                var weatherList = weatherData.list;
+                $(".weather-result").html('');
+                var weatherContent = '<div class="weather-container">';
+                weatherContent += '<div class="country_name">Country name is ' + weatherCountry + '. Below the weather conditions:</div>';
+                weatherContent += '<div class="weather-data"><div class="cloud_data">';
+                var currentDate = '';
+                var tempSum = 0;
+                var dailyCounter = 0;
+                var daysCounted = 0;
+                var dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                console.log(weatherList);
+                for (var i = 0; i < weatherList.length; i++) {
+                            var dt_txt = weatherList[i].dt_txt;
+                            var dateTimeArray = dt_txt.split(" ");
+                            var date = dateTimeArray[0];
+                            var time = formatTimeTo12Hour(dateTimeArray[1]);
+                            var weatherCondition = weatherList[i].weather[0].main;
+                            var temperature = Math.round(weatherList[i].main.temp);
+                            var dateObj = new Date(date);
+                            var dayOfWeek = dayNames[dateObj.getDay()];
+
+                            // Check if the date has changed or if we're at the first iteration
+                            if (currentDate !== date) {
+                                if (currentDate !== '') {
+                                    var averageTemp = Math.round(tempSum / dailyCounter);
+                                    weatherContent = weatherContent.replace('{{averageTemperature}}', averageTemp.toFixed(2) + '°C');
+                                    weatherContent += '</div>';
+                                    daysCounted++;
+                                    if (daysCounted >= 5) {
+                                        break; // Stop after 5 days
+                                    }
                                 }
-                            })
-                        }))
-                    $('#textInput').val('');
-                }
-            }))
-            })
+
+                                // Start a new day
+                                currentDate = date;
+                                dailyCounter = 0;
+                                tempSum = 0;
+                                weatherContent += '<div class="weather-entry">';
+                                weatherContent += '<div class="date">' + dayOfWeek + '</div>';  
+                                weatherContent += '<div class="average-temperature">{{averageTemperature}}</div>'; // Placeholder for average temperature
+                            }
+                            weatherContent += '<ul>';
+                            // Add each interval data to the list
+                            if (dailyCounter < 7) {
+                                weatherContent += '<li><div class="time">' + time + '</div><div class="temperature">' + temperature + '°C</div><div class="weather-condition">' + weatherCondition  + '</div></li>';
+                                tempSum += temperature;
+                                dailyCounter++;
+                            }
+                            weatherContent += '</ul>';
+                        }
+                        if (dailyCounter > 0) {
+    var averageTemp = Math.round(tempSum / dailyCounter);
+    weatherContent = weatherContent.replace('{{averageTemperature}}', averageTemp.toFixed(2) + '°C');
+    weatherContent += '</div>'; // Close the last day's weather-entry div
+}
+
+                weatherContent += '</ul></div></div>';
+                weatherContent += '</div>';
+                //var weatherDateDescription = weatherData.weather[0].description;
+                $(".weather-result").html(weatherContent);
+             }});
+            });
+            function formatTimeTo12Hour(timeString) {
+    var timeArray = timeString.split(':');
+    var hours = parseInt(timeArray[0]);
+    var minutes = timeArray[1];
+    var period = hours >= 12 ? 'PM' : 'AM';
+
+    hours = hours % 12 || 12; // Convert to 12-hour format, with 12 for 0 hours
+    var formattedTime = hours + ' ' + period;
+
+    return formattedTime;
+}
+        });
     </script>
+    
 </body>
 </html>
