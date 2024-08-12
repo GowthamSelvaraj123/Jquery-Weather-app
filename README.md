@@ -1,5 +1,5 @@
 <h1>Weather App</h1>
-![image](https://github.com/user-attachments/assets/91140fe2-b6a2-42b0-a615-1816758f995e)
+<img src="https://github.com/user-attachments/assets/91140fe2-b6a2-42b0-a615-1816758f995e" />
 
 <h3>Overview</h3>
 <p>This project is a simple yet powerful weather application built using jQuery and the OpenWeatherMap API. The app allows users to search for weather information by entering the name of a country. The application fetches real-time weather data for the next five days and displays it in a user-friendly format.</p>
