@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TODO List Application</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <style>
+        body{background-color: #222;display:flex;flex-direction:column;justify-content: center;align-items: center;}
+        h1{color:white;}
+        input { padding: 15px 20px; margin-bottom: 0px; min-width: 600px; border-radius: 5px 0px 0px 5px; border: unset; font-size: 14px;}
+        input:focus{border:unset;outline:unset;}
+        button {background-color: orange;border: unset;padding: 15px 20px;font-size: 14px;border-radius: 0px 5px 5px 0px;}
+        form {display: flex;}
+        ul#taskLists{padding:0px;}
+        ul#taskLists li { color: black; list-style: none; background-color: orange; width: 600px; padding: 10px 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-radius: 5px; font-size: 20px; text-transform: capitalize; font-family: sans-serif; }
+        .action-button button { background-color: white; padding: 9px; border-radius: 6px; width: 90px; margin-left: 10px; }
+        @media (max-width: 768px){
+            input{min-width:100%;border-radius: 10px;margin-bottom: 20px;}
+            form{flex-direction: column;border-radius: 10px;justify-content: center;align-items: center;width: calc(100% - 60px);}
+            button#addTask{border-radius: 10px;}
+            ul#taskLists li{width: auto;}
+        }
+    </style>
+</head>
+<body>
+<h1>TODO List Application</h1>
+<form id="taskForm">
+<input type="text" id="textInput" placeholder="Enter a Task">
+<button id="addTask">Add Task</button>
+</form>
+<ul id="taskLists">
+
+</ul>
+    <script>
+        $(document).ready(function(){
+            $('#taskForm').on('submit',(function(event){
+                event.preventDefault();
+                var task = $('#textInput').val();
+                if(task){
+                    $('#taskLists').append('<li><span class="list-text">'+task+'</span><div class="action-button"><button class="edit">Edit</button><button class="remove">Remove</button></div></li>');
+                        $('.remove').on('click',(function(){
+                            $(this).parents('li').remove();
+                        }))
+                        $('.edit').on('click',(function(){
+                            $(this).parents('li').addClass('currentEdit');
+                            $('#addTask').addClass('currentTask');
+                            var currentTask = $(this).parents('li').find('.list-text').text();
+                            $('#textInput').val(currentTask);
+                            $('#addTask').text('Edit Task');
+                            $('.currentTask').click(function(event){
+                                if($(this).hasClass('currentTask')){
+                                event.preventDefault();
+                                var editTask = $('#textInput').val();
+                                $('.currentEdit').find('.list-text').text(editTask);
+                                $('#addTask').text('Add Task');
+                                $('#textInput').val('');
+                                $('#taskLists').find('li').removeClass('currentEdit');
+                                $('#addTask').removeClass('currentTask');
+                                }
+                            })
+                        }))
+                    $('#textInput').val('');
+                }
+            }))
+            })
+    </script>
+</body>
+</html>
